@@ -38,7 +38,7 @@ re-parses the full request and gives the final answer.
 | v2 | 0.883 | 16 | 3.6% | 2.11 | 29.9 |
 | v3 | 0.947 | 0 | 1.6% | 2.30 | 36.2 |
 | v4 | 1.000 | 0 | 2.1% | 2.59 | 38.1 |
-| v5 (final) | 1.000 | 0 | [X]% | 1.94 | 39.4 |
+| v5 (final) | 1.000 | 0 | 2.1% | 1.94 | 39.4 |
 
 ## Limitations
 The vocabulary is rule-based and was tuned on the dev set, so unseen phrasings can
