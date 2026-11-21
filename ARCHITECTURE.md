@@ -29,6 +29,10 @@ re-parses the full request and gives the final answer.
   request, so the agent commits only when the match is unique and stable.
 - We tested NEED = 2: 4 wrong commits. NEED = 3: 0 wrong commits. We kept 3.
 - Rule-based with no LLM: about 0.14 ms per word, no running cost, deterministic.
+- Stress test (stress_test.py): 300 generated requests per    seed, with corrections
+  such as "forget that" and "cancel that" that are not in dev.jsonl. The first
+  version had 5-8 wrong commits per seed. After widening the correction guard: 0
+  on three seeds.
 
 ## Results (dev.jsonl, 300 requests)
 | Version | Accuracy | Wrong commits | Earliness | Searches/req | Score |
