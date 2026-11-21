@@ -17,7 +17,7 @@ and commits only when confident.
 | Version | Accuracy | Wrong commits | Earliness | Searches/req | Score |
 |---|---|---|---|---|---|
 | Baseline | 0.527 | 0 | 0.0% | 1.53 | 20.0 |
-| Final | 1.000 | 0 | 2.1% | 1.94 | 39.4 |
+| Final | 1.000 | 0 | 2.0% | 1.90 | 39.4 |
 
 ## Run
 ```

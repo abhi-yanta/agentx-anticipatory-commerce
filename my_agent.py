@@ -15,7 +15,11 @@ SIZE_WORDS = {"small": "s", "medium": "m", "large": "l", "xs": "xs", "s": "s",
 MARKERS = {"no", "wait", "actually", "instead", "sorry", "change", "make", "not", "oops", "oh"}
 BLOCKERS = {"no", "wait", "actually", "sorry", "oops", "mean", "meant", "matlab",
             "nahi", "nahin", "instead", "change", "make", "rather", "scratch",
-            "correction", "switch", "replace", "hold", "ruko", "galat", "second"}
+            "correction", "switch", "replace", "hold", "ruko", "galat", "second",
+            "forget", "cancel", "take", "back", "never", "mind", "hmm", "thought",
+            "undo", "ignore", "disregard", "skip", "drop", "remove", "wrong",
+            "mistake", "different", "other", "else", "but", "however", "arre",
+            "chodo", "rehne", "sahi", "nope", "hang", "uh", "um", "erm"}
 NEED = 3
 SYNONYMS = {
     "category": {
