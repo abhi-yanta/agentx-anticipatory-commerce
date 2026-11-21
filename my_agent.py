@@ -14,7 +14,8 @@ SIZE_WORDS = {"small": "s", "medium": "m", "large": "l", "xs": "xs", "s": "s",
               "m": "m", "l": "l", "xl": "xl", "xxl": "xxl", "2xl": "xxl"}
 MARKERS = {"no", "wait", "actually", "instead", "sorry", "change", "make", "not", "oops", "oh"}
 BLOCKERS = {"no", "wait", "actually", "sorry", "oops", "mean", "meant", "matlab",
-            "nahi", "instead", "change", "make", "rather"}
+            "nahi", "nahin", "instead", "change", "make", "rather", "scratch",
+            "correction", "switch", "replace", "hold", "ruko", "galat", "second"}
 NEED = 3
 SYNONYMS = {
     "category": {
