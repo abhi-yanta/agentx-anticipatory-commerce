@@ -4,6 +4,10 @@ from search import load_catalogue
 UNITS = {w: i for i, w in enumerate(
     "zero one two three four five six seven eight nine ten eleven twelve thirteen "
     "fourteen fifteen sixteen seventeen eighteen nineteen".split())}
+UNITS.update({"ek": 1, "teen": 3, "chaar": 4, "paanch": 5, "chhe": 6, "chhah": 6,
+              "saat": 7, "aath": 8, "nau": 9, "das": 10, "gyarah": 11, "barah": 12,
+              "terah": 13, "chaudah": 14, "pandrah": 15, "solah": 16, "satrah": 17,
+              "atharah": 18})
 TENS = {w: 10 * (i + 2) for i, w in enumerate(
     "twenty thirty forty fifty sixty seventy eighty ninety".split())}
 SIZE_WORDS = {"small": "s", "medium": "m", "large": "l", "xs": "xs", "s": "s",
@@ -19,23 +23,32 @@ SYNONYMS = {
         "track pants": ["joggers", "jogger", "trackpants", "track pant"],
         "running shoes": ["jogging shoes", "jogging shoe", "running sneakers",
                           "running sneaker", "runners"],
+        "backpacks": ["rucksack", "rucksacks", "bag pack", "bag packs", "bagpack",
+                      "bagpacks", "backpack"],
+        "watches": ["wrist watch", "wrist watches", "wristwatch", "wristwatches", "watch"],
+        "dresses": ["dress"],
     },
-    "colour": {"grey": ["gray"], "navy": ["navy blue"], "olive": ["olive green"]},
+    "colour": {"grey": ["gray"], "navy": ["navy blue"], "olive": ["olive green"],
+               "gold": ["golden"], "black": ["kaala", "kala"], "pink": ["gulabi"],
+               "brown": ["bhura", "bhoora"], "white": ["safed"], "red": ["laal", "lal"],
+               "blue": ["neela"], "green": ["hara"], "yellow": ["peela"]},
 }
 
 
 def numify(words):
-    out, total, cur, active = [], 0, 0, False
+    out, total, cur, active, half = [], 0, 0, False, False
     for w in words:
-        if w in UNITS or w in TENS:
+        if w == "saadhe":
+            half = True; active = True
+        elif w in UNITS or w in TENS:
             cur += UNITS.get(w, TENS.get(w)); active = True
-        elif w == "hundred" and active:
-            cur = (cur or 1) * 100
-        elif w in ("thousand", "grand") and active:
-            total += (cur or 1) * 1000; cur = 0
+        elif w in ("hundred", "sau") and active:
+            cur = (cur or 1) * 100 + (50 if half else 0); half = False
+        elif w in ("thousand", "grand", "hazaar", "hazar") and active:
+            total += (cur or 1) * 1000 + (500 if half else 0); cur = 0; half = False
         else:
             if active:
-                out.append(str(total + cur)); total = cur = 0; active = False
+                out.append(str(total + cur)); total = cur = 0; active = False; half = False
             out.append(w)
     if active:
         out.append(str(total + cur))
@@ -55,6 +68,8 @@ class Agent:
                 forms = {v, v.replace("-", " ")}
                 if field == "category" and v.endswith("s"):
                     forms |= {v[:-1], v[:-1].replace("-", " ")}
+                    if v.endswith("es"):
+                        forms |= {v[:-2]}
                 for x in forms:
                     self.aliases.append((x, field, v))
         for field, d in SYNONYMS.items():
@@ -94,8 +109,8 @@ class Agent:
         for i, w in enumerate(toks):
             cand = SIZE_WORDS.get(w)
             if cand is None and w.isdigit() and (
-                    (i > 0 and toks[i - 1] in ("size", "uk", "waist"))
-                    or (i + 1 < len(toks) and toks[i + 1] == "uk")):
+                    (i > 0 and (toks[i - 1] in ("size", "uk", "waist") or toks[i - 1] in BLOCKERS))
+                    or (i + 1 < len(toks) and toks[i + 1] in ("uk", "number"))):
                 cand = w
             if cand and cand in self.sizes:
                 f["size"] = self.sizes[cand]
@@ -103,6 +118,11 @@ class Agent:
                        r"not more than|no more than|at most)\s+(?:rs\.?\s*|₹)?(\d[\d,]*)", text)
         if b:
             f["max_price"] = int(b[-1].replace(",", "") or 0)
+        else:
+            b2 = re.findall(r"(\d[\d,]*)\s+(?:rs\.?\s+|rupees?\s+|rupaye\s+)?"
+                            r"(?:tak|se kam|se kum|ke andar)", text)
+            if b2:
+                f["max_price"] = int(b2[-1].replace(",", "") or 0)
         return text, f
 
     def observe(self, word):
@@ -110,7 +130,7 @@ class Agent:
         if not w:
             return None
         self.words.append(w)
-        if self.prev == "no" and w != "more":      # "no more than" is a budget, not a correction
+        if self.prev == "no" and w != "more":
             self.blocked = True
         if w in BLOCKERS and w != "no":
             self.blocked = True
@@ -131,7 +151,7 @@ class Agent:
                 self.count += 1
             else:
                 self.pending, self.count = pid, 1
-            if self.count >= 3:                    # same unique product on 3 words in a row
+            if self.count >= 3:
                 self.committed = pid
                 return {"commit": pid}
         else:
