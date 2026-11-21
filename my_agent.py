@@ -15,6 +15,7 @@ SIZE_WORDS = {"small": "s", "medium": "m", "large": "l", "xs": "xs", "s": "s",
 MARKERS = {"no", "wait", "actually", "instead", "sorry", "change", "make", "not", "oops", "oh"}
 BLOCKERS = {"no", "wait", "actually", "sorry", "oops", "mean", "meant", "matlab",
             "nahi", "instead", "change", "make", "rather"}
+NEED = 3
 SYNONYMS = {
     "category": {
         "t-shirts": ["tee", "tees", "tshirt", "tshirts", "t shirt", "t shirts"],
@@ -82,7 +83,7 @@ class Agent:
     def start(self, request_id):
         self.words, self.last_key, self.committed = [], None, None
         self.pending, self.count, self.blocked, self.prev = None, 0, False, ""
-
+        self.last_unique = None
     def find(self, text):
         taken = [False] * len(text)
         best = {}
@@ -141,17 +142,17 @@ class Agent:
         if len(f) < 4 or "category" not in f or "max_price" not in f:
             return None
         key = tuple(sorted(f.items()))
-        if key == self.last_key and self.pending is None:
-            return None
-        self.last_key = key
-        hits = self.tools.search(text, f, k=2)
-        if len(hits) == 1:
-            pid = hits[0]["product_id"]
+        if key != self.last_key:                  # search only when the filters change
+            self.last_key = key
+            hits = self.tools.search(text, f, k=2)
+            self.last_unique = hits[0]["product_id"] if len(hits) == 1 else None
+        pid = self.last_unique
+        if pid:
             if self.pending == pid:
                 self.count += 1
             else:
                 self.pending, self.count = pid, 1
-            if self.count >= 3:
+            if self.count >= NEED:
                 self.committed = pid
                 return {"commit": pid}
         else:
