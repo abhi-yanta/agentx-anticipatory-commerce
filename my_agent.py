@@ -8,8 +8,9 @@ TENS = {w: 10 * (i + 2) for i, w in enumerate(
     "twenty thirty forty fifty sixty seventy eighty ninety".split())}
 SIZE_WORDS = {"small": "s", "medium": "m", "large": "l", "xs": "xs", "s": "s",
               "m": "m", "l": "l", "xl": "xl", "xxl": "xxl", "2xl": "xxl"}
-MARKERS = {"no", "wait", "actually", "instead", "sorry", "change", "make", "not",
-           "oops", "oh"}
+MARKERS = {"no", "wait", "actually", "instead", "sorry", "change", "make", "not", "oops", "oh"}
+BLOCKERS = {"no", "wait", "actually", "sorry", "oops", "mean", "meant", "matlab",
+            "nahi", "instead", "change", "make", "rather"}
 SYNONYMS = {
     "category": {
         "t-shirts": ["tee", "tees", "tshirt", "tshirts", "t shirt", "t shirts"],
@@ -64,7 +65,8 @@ class Agent:
         self.aliases.sort(key=lambda a: -len(a[0]))
 
     def start(self, request_id):
-        self.words, self.last_key, self.committed, self.pending = [], None, None, None
+        self.words, self.last_key, self.committed = [], None, None
+        self.pending, self.count, self.blocked, self.prev = None, 0, False, ""
 
     def find(self, text):
         taken = [False] * len(text)
@@ -85,7 +87,7 @@ class Agent:
         text = re.sub(r"(\d+(?:\.\d+)?)\s*k\b",
                       lambda m: str(int(round(float(m.group(1)) * 1000))), text)
         for a, b in (("double extra large", "xxl"), ("extra extra large", "xxl"),
-                     ("extra large", "xl"), ("extra small", "xs")):
+                     ("double xl", "xxl"), ("extra large", "xl"), ("extra small", "xs")):
             text = text.replace(a, b)
         f = self.find(text)
         toks = text.split()
@@ -108,7 +110,12 @@ class Agent:
         if not w:
             return None
         self.words.append(w)
-        if self.committed or w in MARKERS:
+        if self.prev == "no" and w != "more":      # "no more than" is a budget, not a correction
+            self.blocked = True
+        if w in BLOCKERS and w != "no":
+            self.blocked = True
+        self.prev = w
+        if self.committed or self.blocked or w in MARKERS:
             return None
         text, f = self.parse()
         if len(f) < 4 or "category" not in f or "max_price" not in f:
@@ -121,11 +128,14 @@ class Agent:
         if len(hits) == 1:
             pid = hits[0]["product_id"]
             if self.pending == pid:
+                self.count += 1
+            else:
+                self.pending, self.count = pid, 1
+            if self.count >= 3:                    # same unique product on 3 words in a row
                 self.committed = pid
                 return {"commit": pid}
-            self.pending = pid
         else:
-            self.pending = None
+            self.pending, self.count = None, 0
         return None
 
     def finish(self):
