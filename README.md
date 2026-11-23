@@ -25,4 +25,4 @@ python evaluate.py --agent my_agent.py
 python demo.py "show me black running shoes size 9 under 2000"
 ```
 
-See ARCHITECTURE.md for the design.
+See ARCHITECTURE.md for the better design.
