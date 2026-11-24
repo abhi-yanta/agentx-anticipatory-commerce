@@ -48,3 +48,9 @@ re-parses the full request and gives the final answer.
 The vocabulary is rule-based and was tuned on the dev set, so unseen phrasings can
 fail. Next steps: an LLM fallback for unknown phrases, and a learned commit-confidence
 model.
+## Rezolve Labs capabilities
+None used. The Nov 22 organiser email states the Rezolve requirement was removed.
+We asked in the Doubts section on Nov 23 (Competition ID AX-283FB72B9A7E) about the
+account and coupon and had no reply by submission. The agent runs fully locally with
+no external API calls; it can be extended with Rezolve semantic search as a fallback
+for unseen phrasings.
