@@ -53,6 +53,4 @@ None used. The Nov 22 organiser email states the Rezolve requirement was removed
 We asked in the Doubts section on Nov 23 (Competition ID AX-283FB72B9A7E) about the
 account and coupon and had no reply by submission. The agent runs fully locally with
 no external API calls; it can be extended with Rezolve semantic search as a fallback
-
-
 for unseen phrasings.
